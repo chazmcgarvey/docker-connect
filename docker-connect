@@ -1,0 +1,308 @@
+#!/bin/sh
+
+: <<'=cut'
+=pod
+
+=head1 NAME
+
+docker-connect - Easily connect to Docker sockets over SSH
+
+=head1 VERSION
+
+Version 0.80
+
+=head1 SYNOPSIS
+
+    docker-connect HOSTNAME [SHELL_ARGS]...
+
+    # launch a new shell wherein docker commands go to staging-01.acme.tld
+    docker-connect staging-01.acme.tld
+
+    # list the docker processes running on staging-01.acme.tld
+    docker-connect staging-01.acme.tld -c 'docker ps'
+
+=head1 DESCRIPTION
+
+This script provides an alternative to Docker Machine for connecting your Docker client to a remote
+Docker daemon. Instead of connecting directly to a Docker daemon listening on an external TCP port,
+this script sets up a connection to the UNIX socket via SSH.
+
+Why?
+
+The main use case for this is when dealing with "permanent" app servers in an environment where you
+have a team of individuals who all need access.
+
+Machine doesn't have a great way to support multiple concurrent users. You can add an existing
+machine to which you have SSH access using the generic driver on your computer, but if your
+colleague does the same then Machine will regenerate the Docker daemon TLS certificates, replacing
+the ones Machine set up for you.
+
+Furthermore, the Docker daemon relies on TLS certificates for client authorization, which is all
+fine and good, but organizations are typically not as prepared to deal with the management of client
+TLS certificates as they are with the management of SSH keys. Worse, the Docker daemon doesn't
+support certificate revocation lists! So if a colleague leaves, you must replace the certificate
+authority and recreate and distribute certificates for each remaining member of the team. Ugh!
+
+Much easier to just use SSH for authorization.
+
+To be clear, this script isn't a full replacement for Docker Machine. For one thing, Machine has
+a lot more features and can actually create machines. This script just assists with a particular
+workflow that is currently underserved by Machine.
+
+=head1 REQUIREMENTS
+
+=over
+
+=item * a Bourne-compatible, POSIX-compatible shell
+
+This program is written in shell script.
+
+=item * L<OpenSSH|https://www.openssh.com> 6.7+
+
+Needed to make the socket connection.
+
+=item * L<Docker|https://www.docker.com> client
+
+Not technically required, but this program isn't useful without it.
+
+=back
+
+=head1 INSTALL
+
+=for markdown [![Build Status](https://travis-ci.org/chazmcgarvey/docker-connect.svg?branch=master)](https://travis-ci.org/chazmcgarvey/docker-connect)
+
+To install, just copy F<docker-connect> into your C<PATH> and make sure it is executable.
+
+    # Assuming you have "$HOME/bin" in your $PATH:
+    cp docker-connect ~/bin/
+    chmod +x ~/bin/docker-connect
+
+=head1 ENVIRONMENT
+
+The following environment variables may affect or will be set by this program:
+
+=over
+
+=item * C<DOCKER_CONNECT_SOCKET>
+
+The absolute path to the local socket.
+
+=item * C<DOCKER_CONNECT_HOSTNAME>
+
+The hostname of the remote peer.
+
+=item * C<DOCKER_CONNECT_PID>
+
+The PID of the SSH process maintaining the connection.
+
+=item * C<DOCKER_HOST>
+
+The URI of the local socket.
+
+=back
+
+=head1 TIPS
+
+If you run many shells and connections, having the hostname of the host that the Docker client is
+connected to in your prompt may be handy. Try something like this in your local shell config file:
+
+    if [ -n "$DOCKER_CONNECT_HOSTNAME" ]
+    then
+        PS1="[docker:$DOCKER_CONNECT_HOSTNAME] $PS1"
+    fi
+
+=head1 AUTHOR
+
+Charles McGarvey <chazmcgarvey@brokenzipper.com>
+
+=head1 LICENSE
+
+This software is copyright (c) 2017 by Charles McGarvey.
+
+This is free software, licensed under:
+
+    The MIT (X11) License
+
+=cut
+
+set -e
+
+prog=$(basename "$0")
+version="0.80"
+quiet=0
+socket="$DOCKER_CONNECT_SOCKET"
+remote_socket=${REMOTE_SOCKET:-/run/docker.sock}
+timeout=${TIMEOUT:-15}
+
+usage() {
+    cat <<END
+$prog [OPTIONS]... HOSTNAME [SHELL_ARGS]...
+Easily connect to Docker sockets over SSH.
+
+OPTIONS:
+    -h      Show this help info and exit.
+    -q      Be less verbose; can be repeated to enhance effect.
+    -r STR  Specify the absolute path of the remote socket.
+    -s STR  Specify the absolute path of the local socket.
+    -v      Show the program version.
+END
+}
+
+log() {
+    _l=$1
+    shift
+    if [ "$_l" -ge "$quiet" ]
+    then
+        echo >&2 "$prog: $@"
+    fi
+}
+
+while getopts "hqr:s:v" opt
+do
+    case "$opt" in
+        q)
+            quiet=$(expr $quiet + 1)
+            ;;
+        s)
+            socket="$OPTARG"
+            ;;
+        r)
+            remote_socket="$OPTARG"
+            ;;
+        h)
+            usage
+            exit 0
+            ;;
+        v)
+            echo "docker-connect $version"
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+shift $(expr $OPTIND - 1)
+
+connect=$1
+if [ -z "$connect" ]
+then
+    echo >&2 "Missing HOSTNAME."
+    usage
+    exit 1
+fi
+shift
+
+if [ -z "$socket" ]
+then
+    socket_dir="${TMPDIR:-/tmp}/docker-connect-$(id -u)"
+    mkdir -p "$socket_dir"
+    chmod 0700 "$socket_dir"
+    socket="$socket_dir/docker-$$.sock"
+fi
+
+if [ -S "$socket" ]
+then
+    if [ -n "$DOCKER_CONNECT_HOSTNAME" ]
+    then
+        log 2 "Docker is already connected to $DOCKER_CONNECT_HOSTNAME in this shell."
+        exit 2
+    else
+        log 2 "Docker socket already exists."
+        log 1 "To force a new connection, first remove the file: $socket"
+        exit 3
+    fi
+elif [ -e "$socket" ]
+then
+    log 2 "Cannot create socket because another file is in the way."
+    log 1 "To create a new connection, you may first remove the file: $socket"
+    exit 4
+fi
+
+hostname=
+port=
+user=
+
+if echo "$connect" |grep -q ':'
+then
+    hostname=$(echo "$connect" |cut -d: -f1)
+    port=$(echo "$connect" |cut -d: -f2)
+else
+    hostname="$connect"
+fi
+
+if echo "$hostname" |grep -q '@'
+then
+    user=$(echo "$hostname" |cut -d@ -f1)
+    hostname=$(echo "$hostname" |cut -d@ -f2)
+else
+    user=$(cat ansible.cfg 2>/dev/null |sed -ne 's/^remote_user[[:space:]]*=[[:space:]]*//p')
+fi
+
+ssh_connect="$hostname"
+
+if [ "$user" != "" ]
+then
+    ssh_connect="$user@$ssh_connect"
+fi
+
+if [ "$port" != "" ]
+then
+    ssh_connect="$ssh_connect -p$port"
+fi
+
+${SSH:-ssh} $ssh_connect -L"$socket:$remote_socket" \
+    -oControlPath=none -oConnectTimeout="$timeout" -nNT &
+ssh_pid=$!
+ssh_connected=
+
+handle_noconnect() {
+    log 2 "The connection could not be established."
+    log 1 "Please ensure that you can execute this command successfully:"
+    log 1 "  ${SSH:-ssh} $ssh_connect -oControlPath=none echo OK"
+    exit 5
+}
+
+handle_disconnect() {
+    kill $ssh_pid 2>/dev/null || true
+    rm -f "$socket"
+    log 0 "Disconnected docker from $hostname."
+}
+
+# Wait for the socket connection to be made.
+for i in $(seq 1 "${timeout}0")
+do
+    if [ -S "$socket" ]
+    then
+        ssh_connected=1
+        break
+    fi
+    if ! kill -s 0 $ssh_pid 2>/dev/null
+    then
+        handle_noconnect
+    fi
+    sleep 0.1
+done
+
+if [ -z "$ssh_connected" ]
+then
+    handle_noconnect
+fi
+
+trap handle_disconnect EXIT
+
+export DOCKER_CONNECT_HOSTNAME="$hostname"
+export DOCKER_CONNECT_PID="$ssh_pid"
+export DOCKER_CONNECT_SOCKET="$socket"
+export DOCKER_HOST="unix://$socket"
+
+# Remove incompatible variables set by Docker Machine.
+unset DOCKER_MACHINE_NAME
+unset DOCKER_CERT_PATH
+unset DOCKER_TLS_VERIFY
+
+log 1 "Executing new shell with docker connected to $hostname."
+log 0 "This connection will be terminated when the shell exits."
+${SHELL:-/bin/sh} "$@"
+
