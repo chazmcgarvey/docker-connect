@@ -236,8 +236,6 @@ if echo "$hostname" |grep -q '@'
 then
     user=$(echo "$hostname" |cut -d@ -f1)
     hostname=$(echo "$hostname" |cut -d@ -f2)
-else
-    user=$(cat ansible.cfg 2>/dev/null |sed -ne 's/^remote_user[[:space:]]*=[[:space:]]*//p')
 fi
 
 ssh_connect="$hostname"
