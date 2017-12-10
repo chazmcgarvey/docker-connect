@@ -4,7 +4,7 @@ docker-connect - Easily connect to Docker sockets over SSH
 
 # VERSION
 
-Version 0.80
+Version 0.81
 
 # SYNOPSIS
 

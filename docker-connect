@@ -9,7 +9,7 @@ docker-connect - Easily connect to Docker sockets over SSH
 
 =head1 VERSION
 
-Version 0.80
+Version 0.81
 
 =head1 SYNOPSIS
 
