@@ -9,7 +9,7 @@ docker-connect - Easily connect to Docker sockets over SSH
 
 =head1 VERSION
 
-Version 0.81
+Version 0.82
 
 =head1 SYNOPSIS
 
@@ -142,7 +142,7 @@ Charles McGarvey <chazmcgarvey@brokenzipper.com>
 
 =head1 LICENSE
 
-This software is copyright (c) 2017 by Charles McGarvey.
+This software is copyright (c) 2018 by Charles McGarvey.
 
 This is free software, licensed under:
 
@@ -153,7 +153,7 @@ This is free software, licensed under:
 set -e
 
 prog=$(basename "$0")
-version="0.80"
+version="0.82"
 quiet=0
 socket="$DOCKER_CONNECT_SOCKET"
 remote_socket=${REMOTE_SOCKET:-/run/docker.sock}
