@@ -85,8 +85,6 @@ alternative for use on non-multiuser machines only.
 
 # INSTALL
 
-[![Build Status](https://travis-ci.org/chazmcgarvey/docker-connect.svg?branch=master)](https://travis-ci.org/chazmcgarvey/docker-connect)
-
 To install, just copy `docker-connect` into your `PATH` and make sure it is executable.
 
     # Assuming you have "$HOME/bin" in your $PATH:
@@ -129,7 +127,7 @@ Charles McGarvey <chazmcgarvey@brokenzipper.com>
 
 # LICENSE
 
-This software is copyright (c) 2017 by Charles McGarvey.
+This software is copyright (c) 2018 by Charles McGarvey.
 
 This is free software, licensed under:
 

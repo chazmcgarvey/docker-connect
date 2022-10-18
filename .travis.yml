@@ -1,2 +1,0 @@
-language: sh
-script: make test V=1
