@@ -7,7 +7,7 @@ all:
 docs: README.md
 
 test:
-	$(PROVE) --ext sh $(if $(V),-v)
+	$(PROVE) $(if $(V),-v) test
 
 README.md: docker-connect
 	$(POD2MARKDOWN) "$<" "$@"

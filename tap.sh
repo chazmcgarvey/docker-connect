@@ -84,13 +84,15 @@ isnt() {
 }
 
 pass() {
-    echo "ok $next_test_number - $@"
-    next_test_number=$(expr $next_test_number + 1)
+    echo "ok $next_test_number - $*"
+    # shellcheck disable=SC2003
+    next_test_number=$(expr "$next_test_number" + 1)
 }
 
 fail() {
-    echo "not ok $next_test_number - $@"
-    next_test_number=$(expr $next_test_number + 1)
+    echo "not ok $next_test_number - $*"
+    # shellcheck disable=SC2003
+    next_test_number=$(expr "$next_test_number" + 1)
 }
 
 diag() {
@@ -101,7 +103,7 @@ diag() {
             echo "# $_m"
         done
     else
-        while read _m
+        while read -r _m
         do
             echo "# $_m"
         done

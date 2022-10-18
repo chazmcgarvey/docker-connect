@@ -176,7 +176,7 @@ log() {
     shift
     if [ "$_l" -ge "$quiet" ]
     then
-        echo >&2 "$prog: $@"
+        echo >&2 "$prog: $*"
     fi
 }
 
@@ -184,6 +184,7 @@ while getopts "hqr:s:v" opt
 do
     case "$opt" in
         q)
+            # shellcheck disable=SC2003
             quiet=$(expr $quiet + 1)
             ;;
         s)
@@ -206,7 +207,8 @@ do
             ;;
     esac
 done
-shift $(expr $OPTIND - 1)
+# shellcheck disable=SC2003
+shift "$(expr $OPTIND - 1)"
 
 connect=$1
 if [ -z "$connect" ]
@@ -273,6 +275,7 @@ then
     ssh_connect="$ssh_connect -p$port"
 fi
 
+# shellcheck disable=SC2086
 ${SSH:-ssh} $ssh_connect -L"$socket:$remote_socket" \
     -oControlPath=none -oConnectTimeout="$timeout" -nNT &
 ssh_pid=$!

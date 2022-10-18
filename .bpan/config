@@ -1,0 +1,47 @@
+# Configuration for the 'docker-connect' BPAN package.
+
+[bpan]
+api-version = 1
+
+# Required package info:
+[package]
+name = docker-connect
+version = 0.82.0
+title = easily connect to Docker sockets over SSH
+license = MIT
+copyright = 2017
+repo = https://github.com/chazmcgarvey/docker-connect
+branch = master
+bug = $package.repo/issues/
+tags = bash bpan docker ssh
+
+# Extra package info:
+site = $package.repo
+irc = irc.libera.chat/bpan
+
+# Required author info:
+[author]
+name = Charles McGarvey
+email = chazmcgarvey@brokenzipper.com
+github = chazmcgarvey
+
+# Optional author info:
+site = https://github.com/chazmcgarvey
+irc = cm@irc.libera.chat
+
+# Add an owner entry for each user that can publish this package.
+[owner]
+github = chazmcgarvey
+
+# Required packages.
+[require "package"]
+
+# Required external commands.
+[require "command"]
+ssh = 6.7+
+
+# Packages, Files and Manpages to update (bpan update).
+[update]
+file = test/init
+
+# vim: ft=gitconfig:
