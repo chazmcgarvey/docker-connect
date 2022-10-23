@@ -1,3 +1,4 @@
+#!/bin/sh
 
 temp=$(mktemp -d 2>/dev/null || mktemp -d -t 'test')
 

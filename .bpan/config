@@ -42,6 +42,7 @@ ssh = 6.7+
 
 # Packages, Files and Manpages to update (bpan update).
 [update]
+file = test/00-shellcheck.t
 file = test/init
 
 # vim: ft=gitconfig:
