@@ -94,10 +94,11 @@ Not technically required, but this program isn't useful without it.
 
 =head1 INSTALL
 
-To install, just copy F<docker-connect> into your C<PATH> and make sure it is executable.
+To install, just copy F<bin/docker-connect> into your C<PATH> and make sure it is executable.
 
     # Assuming you have "$HOME/bin" in your $PATH:
-    cp docker-connect ~/bin/
+    curl -Lo ~/bin/docker-connect \
+      https://raw.githubusercontent.com/chazmcgarvey/docker-connect/master/bin/docker-connect
     chmod +x ~/bin/docker-connect
 
 =head1 ENVIRONMENT

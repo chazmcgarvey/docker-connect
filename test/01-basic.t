@@ -1,13 +1,13 @@
 #!/bin/sh
 
-. ./unittest.sh
-. ./tap.sh
+. ./test/unittest.sh
+. ./test/tap.sh
 
 plan 14
 
 cat <<'MOCK' >"$SSH"
 #!/bin/sh
-. ./tap.sh
+. ./test/tap.sh
 next_test_number=1
 note 'ssh args:' "$@"
 is "$1", 'foo',                        'ssh: correct hostname'
@@ -22,7 +22,7 @@ chmod +x "$SSH"
 
 cat <<'MOCK' >"$SHELL"
 #!/bin/sh
-. ./tap.sh
+. ./test/tap.sh
 next_test_number=6
 note 'shell args:' "$@"
 is "$1"                        "bar"            "shell: first shell arg is correct"
@@ -41,5 +41,5 @@ export DOCKER_MACHINE_NAME="qux"
 export DOCKER_CERT_PATH="/somewhere"
 export DOCKER_TLS_VERIFY=1
 
-./docker-connect -qqq foo bar baz
+./bin/docker-connect -qqq foo bar baz
 

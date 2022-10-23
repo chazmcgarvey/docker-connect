@@ -85,10 +85,11 @@ alternative for use on non-multiuser machines only.
 
 # INSTALL
 
-To install, just copy `docker-connect` into your `PATH` and make sure it is executable.
+To install, just copy `bin/docker-connect` into your `PATH` and make sure it is executable.
 
     # Assuming you have "$HOME/bin" in your $PATH:
-    cp docker-connect ~/bin/
+    curl -Lo ~/bin/docker-connect \
+      https://raw.githubusercontent.com/chazmcgarvey/docker-connect/master/bin/docker-connect
     chmod +x ~/bin/docker-connect
 
 # ENVIRONMENT
