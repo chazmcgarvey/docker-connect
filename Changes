@@ -1,3 +1,8 @@
+[version "0.82.2"]
+date = Sun Oct 23 13:26:07 MDT 2022
+done = move script to bin/
+done = bpan update
+
 [version "0.82.1"]
 date = Tue Oct 18 17:16:21 MDT 2022
 done = add support for BPAN packaging

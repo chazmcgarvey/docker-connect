@@ -9,7 +9,7 @@ docker-connect - Easily connect to Docker sockets over SSH
 
 =head1 VERSION
 
-Version 0.82.1
+Version 0.82.2
 
 =head1 SYNOPSIS
 
@@ -152,7 +152,7 @@ This is free software, licensed under:
 set -e
 
 prog=$(basename "$0")
-version="0.82.1"
+version="0.82.2"
 quiet=0
 socket="$DOCKER_CONNECT_SOCKET"
 remote_socket=${REMOTE_SOCKET:-/run/docker.sock}
@@ -330,4 +330,3 @@ unset DOCKER_TLS_VERIFY
 log 1 "Executing new shell with docker connected to $hostname."
 log 0 "This connection will be terminated when the shell exits."
 ${SHELL:-/bin/sh} "$@"
-
