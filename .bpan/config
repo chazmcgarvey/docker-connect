@@ -7,7 +7,7 @@ api-version = 1
 [package]
 name = docker-connect
 version = 0.82.2
-title = easily connect to Docker sockets over SSH
+title = Easily connect to Docker sockets over SSH
 license = MIT
 copyright = 2017
 repo = https://github.com/chazmcgarvey/docker-connect
