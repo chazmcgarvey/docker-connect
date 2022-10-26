@@ -85,7 +85,11 @@ alternative for use on non-multiuser machines only.
 
 # INSTALL
 
-Install from the internet using &lt;curl(1)>:
+Install using [BPAN](https://bpan.org/):
+
+    bpan install chazmcgarvey/docker-connect
+
+Install from the internet using [curl(1)](https://curl.se/):
 
     # Assuming you have "$HOME/bin" in your $PATH:
     curl -Lo ~/bin/docker-connect \
