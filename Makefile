@@ -3,7 +3,7 @@ PREFIX  ?= /usr/local
 PROVE           = prove
 POD2MARKDOWN    = pod2markdown
 
-all:
+all: docs
 
 docs: README.md
 
