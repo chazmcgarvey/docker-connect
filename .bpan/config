@@ -44,5 +44,6 @@ ssh = 6.7+
 [update]
 file = test/00-shellcheck.t
 file = test/init
+file = Makefile
 
 # vim: ft=gitconfig:
