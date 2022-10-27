@@ -1,22 +1,28 @@
+ifndef BPAN_ROOT
+    BPAN_ROOT := not/a/bpan/root
+    BPAN_CMDS :=
+endif
+
 PREFIX  ?= /usr/local
 
-PROVE           = prove
-POD2MARKDOWN    = pod2markdown
+PROVE           := prove
+POD2MARKDOWN    := pod2markdown
 
-all: docs
+ifdef V
+    v := $V
+endif
 
-docs: README.md
+all:: docs
 
-install:
+docs:: README.md
+
+install::
 	cp -a bin/docker-connect $(PREFIX)/bin/docker-connect
 
-test:
-	$(PROVE) $(if $(V),-v) test
-
-uninstall:
+uninstall::
 	$(RM) $(PREFIX)/bin/docker-connect
 
-README.md: bin/docker-connect
-	$(POD2MARKDOWN) "$<" "$@"
+README.md:: bin/docker-connect
+	$(POD2MARKDOWN) $< $@
 
-.PHONY: all docs install test uninstall
+.PHONY: all docs install uninstall
